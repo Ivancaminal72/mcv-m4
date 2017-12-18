@@ -1,0 +1,9 @@
+**/.idea
+**/*.jpg
+**/*.pgm
+**/*.pklz
+**/*.pkl
+**/*.dat
+**/*.zip
+**/*.ipynb_checkpoints
+**/Data
