@@ -16,13 +16,25 @@
 %% 1.1. Similarities
 I=imread('Data/0005_s.png'); % we have to be in the proper folder
 
+%---------------------------------------------------------------------
 % ToDo: generate a matrix H which produces a similarity transformation
+angle=60;
+S=1;
+t=[0 0];
+H = [S*cos(angle) -S*sin(angle) t(1);
+    S*sin(angle) S*cos(angle) t(2);
+    0 0 1];
+%---------------------------------------------------------------------
 
-I2 = apply_H(I, H);
+I2 = apply_H(I, H,'fit');
 figure; imshow(I); figure; imshow(uint8(I2));
 
 
 %% 1.2. Affinities
+Angle1=60;
+Angle2=45;
+sclae=0.5;
+t=[1,2];
 
 % ToDo: generate a matrix H which produces an affine transformation
 
@@ -37,6 +49,7 @@ figure; imshow(I); figure; imshow(uint8(I2));
 
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
+%% NUL DIFFERENCE
 
 
 
@@ -68,9 +81,15 @@ p6 = [A(i,3) A(i,4) 1]';
 i = 565;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
+imshow(I);
+hold on;
+plot(p8(1), p8(2), 'r*', 'LineWidth', 2, 'MarkerSize', 15);
+
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
+%WE HAVE TO VISUALIZE THE POINTS AND THEN MAKE THE LINES COMPUTING THE CROSS
+%PRODUCT OF THE POINTS TO GET THE LINES IN THE PROJECTIVE SPACE
 
 % show the chosen lines in the image
 figure;imshow(I);
