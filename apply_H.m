@@ -1,10 +1,10 @@
-function I2=apply_H(I_T, H)
+function It=apply_H(I, H)
 % I: image to be transformed
 % H: homography [3x3 matrix]
-% I2: transformed image
+% It: transformed image
 
 % image size
-[nr, nc, nchan] = size(I_T);
+[nr, nc, nchan] = size(I);
 
 %image corners
 c1 = [1 1 1]';
@@ -45,8 +45,8 @@ HX = HX ./ HZ;
 HY = HY ./ HZ;
 
 %Transformed image
-I2 = zeros(Hnr, Hnc, nchan);
+It = zeros(Hnr, Hnc, nchan);
 for l=1:nchan
-    I_T(:,:,l) = interp2(double(I_T(:,:,l)), HX, HY, 'linear', 0);
+    It(:,:,l) = interp2(double(I(:,:,l)), HX, HY, 'linear', 0);
 end
 
