@@ -19,10 +19,10 @@ I=imread('Data/0005_s.png'); % we have to be in the proper folder
 %---------------------------------------------------------------------
 % ToDo: generate a matrix H which produces a similarity transformation
 angle=60;
-S=1;
+Eq=1;
 t=[0 0];
-H = [S*cos(angle) -S*sin(angle) t(1);
-    S*sin(angle) S*cos(angle) t(2);
+H = [Eq*cos(angle) -Eq*sin(angle) t(1);
+    Eq*sin(angle) Eq*cos(angle) t(2);
     0 0 1];
 %---------------------------------------------------------------------
 
@@ -81,15 +81,17 @@ p6 = [A(i,3) A(i,4) 1]';
 i = 565;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
-imshow(I);
-hold on;
-plot(p8(1), p8(2), 'r*', 'LineWidth', 2, 'MarkerSize', 15);
+% imshow(I);
+% hold on;
+% plot(p8(1), p8(2), 'r*', 'LineWidth', 2, 'MarkerSize', 15);
 
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
 
-%WE HAVE TO VISUALIZE THE POINTS AND THEN MAKE THE LINES COMPUTING THE CROSS
-%PRODUCT OF THE POINTS TO GET THE LINES IN THE PROJECTIVE SPACE
+l1=cross(p1,p2);
+l2=cross(p3,p4);
+l3=cross(p5,p6);
+l4=cross(p7,p8);
 
 % show the chosen lines in the image
 figure;imshow(I);
@@ -101,11 +103,27 @@ plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
 
 % ToDo: compute the homography that affinely rectifies the image
+% Compute the vanishing points 
+v1 = cross(l1,l2);
+v2 = cross(l3,l4);
 
-I2 = apply_H(I, H);
+% Compute the line at infinity
+linf = cross(v1,v2);
+linf = linf / linf(3);
+
+H =[1 0 0;
+    0 1 0;
+    linf(1) linf(2) linf(3)];
+
+I2 = apply_H(I, H,'fit');
 figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+
+lr1=inv(H')*l1;
+lr2=inv(H')*l2;
+lr3=inv(H')*l3;
+lr4=inv(H')*l4;
 
 % show the transformed lines in the transformed image
 figure;imshow(uint8(I2));
@@ -130,6 +148,21 @@ plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 %       the metric rectification) with the chosen lines printed on it.
 %       Compute also the angles between the pair of lines before and after
 %       rectification.
+
+% 2 pairs of ortogonal lines
+L1=lr1;
+M1=lr2;
+
+L2=lr3;
+M2=lr4;
+
+Eq=[L1(1)*M1(1), L1(1)*M1(2) + L1(2)*M1(1), L1(2)*M1(2); L2(1)*M2(1), L2(1)*M2(2) + L2(2)*M2(1), L2(2)*M2(2)];
+s=null(Eq);
+S=[s(1),s(2);s(2),s(3)];
+K=chol(S);
+K=inv(K);
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Affine and Metric Rectification of the left facade of image 0001
