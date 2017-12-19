@@ -18,11 +18,11 @@ I=imread('Data/0005_s.png'); % we have to be in the proper folder
 
 %---------------------------------------------------------------------
 % ToDo: generate a matrix H which produces a similarity transformation
-angle=60;
-Eq=1;
-t=[0 0];
-H = [Eq*cos(angle) -Eq*sin(angle) t(1);
-    Eq*sin(angle) Eq*cos(angle) t(2);
+theta=1;
+s=1;
+t=[30 30];
+H = [s*cosd(theta) -s*sind(theta) t(1);
+    s*sind(theta) s*cosd(theta) t(2);
     0 0 1];
 %---------------------------------------------------------------------
 
@@ -31,27 +31,58 @@ figure; imshow(I); figure; imshow(uint8(I2));
 
 
 %% 1.2. Affinities
-Angle1=60;
-Angle2=45;
-sclae=0.5;
-t=[1,2];
-
 % ToDo: generate a matrix H which produces an affine transformation
+theta=90;
+fi=50;
+s=[2, 1];
+t=[30, 30];
 
+R1 = [cosd(theta), -sind(theta), 0;
+      sind(theta),  cosd(theta), 0;
+      0          ,  0          , 1];
+  
+R2a = [cosd(fi), -sind(fi), 0;
+       sind(fi),  cosd(fi), 0;
+       0       ,  0       , 1];
+  
+R2b = [cosd(-fi), -sind(-fi), 0;
+       sind(-fi),  cosd(-fi), 0;
+       0        ,  0        , 1];
+  
+S = [s(1), 0   , 0;
+     0   , s(2), 0;
+     0   , 0   , 1];
+
+T = [0, 0, t(1);
+     0, 0, t(2);
+     0, 0,  0  ];
+
+H = (R1*R2a*S*R2b)+T;
 I2 = apply_H(I, H);
-figure; imshow(I); figure; imshow(uint8(I2));
+hold on;
+subplot(1, 3, 1); imshow(I); 
+subplot(1, 3, 2); imshow(uint8(I2));
 
 % ToDo: decompose the affinity in four transformations: two
 % rotations, a scale, and a translation
+[U,S,V] = svd(H(1:2,1:2));
+A = U*S*V';
+H2 = zeros(3,3);
+H2(3,3) = 1;
+H2(1:2,3) = t';
+H2(1:2,1:2) = A;
 
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
+if(~any(any(round(H-H2))))
+    disp('same matrices')
+end
 
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
-%% NUL DIFFERENCE
-
-
+I2 = apply_H(I, H2);
+subplot(1, 3, 3); imshow(uint8(I2));
+hold off;
 
 %% 1.3 Projective transformations (homographies)
 

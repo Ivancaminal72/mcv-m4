@@ -5,5 +5,6 @@
 **/*.pkl
 **/*.dat
 **/*.zip
+**/*.asv
 **/*.ipynb_checkpoints
 **/Data
