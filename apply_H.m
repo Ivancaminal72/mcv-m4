@@ -1,91 +1,51 @@
-function I2=apply_H(I, H, size_mode)
+function It=apply_H(I, H)
+% I: image to be transformed
+% H: homography [3x3 matrix]
+% It: transformed image
 
-% Apply the transformation H to the image I
-%
-% INPUTS:
-%   I: image to be transformed (color or gray scale image)
-%   H: 3x3 matrix that specifies the desired transformation
-%   size_mode: variable that specifies the size of the output image.
-%              There are two possible options:
-%              'original': the size of the input image is maintained
-%              'fit': the size of the output image is changed so that
-%                     the whole transformed image is contained in the
-%                     output
-%
-% OUTOUT:
-%   I2: transformed image
-%
+% image size
+[nr, nc, nchan] = size(I);
 
-% input image size
-[nrows, ncols, nchan] = size(I);
+%image corners
+c1 = [1 1 1]';
+c2 = [nc 1 1]';
+c3 = [1 nr 1]';
+c4 = [nc nr 1]';
+        
+% transform corners using H
+H_c1=H*c1; H_c1=H_c1/(H_c1(3));
+H_c2=H*c2; H_c2=H_c2/(H_c2(3)); 
+H_c3=H*c3; H_c3=H_c3/(H_c3(3)); 
+Hc4=H*c4; Hc4=Hc4/(Hc4(3)); 
+        
+% compute extremal transformed corner coordinates
+x_min = round(min([H_c1(1) H_c2(1) H_c3(1) Hc4(1)]));
+x_max = round(max([H_c1(1) H_c2(1) H_c3(1) Hc4(1)]));
+y_min = round(min([H_c1(2) H_c2(2) H_c3(2) Hc4(2)]));
+y_max = round(max([H_c1(2) H_c2(2) H_c3(2) Hc4(2)]));
 
-% check input value
-switch size_mode %la funcio switch mira tots els possibles casos d'un input de la funcio
-    case 'fit'
-        % the new image size should contain the whole transformed imag
-        
-        % image corners in homogeneous coordinates
-        c1 = [1 1 1]';
-        c2 = [ncols 1 1]';
-        c3 = [1 nrows 1]';
-        c4 = [ncols nrows 1]';
-        
-        % transform corners according to H
-        % *** TO COMPLETE ***
-        %     Compute the transformed homogeneous image corners according to H.
-        %     Normalize the homogeneous coordinates so as the third
-        %     coordinate is always 1.
-        %     Call the transformed corners: Hc1, Hc2, Hc3, Hc4
-        %
-        Hc1=H*c1; Hc1=Hc1/(Hc1(3)); % transformed corner c1
-        Hc2=H*c2; Hc2=Hc2/(Hc2(3)); % transformed corner c2
-        Hc3=H*c3; Hc3=Hc3/(Hc3(3)); % transformed corner c3
-        Hc4=H*c4; Hc4=Hc4/(Hc4(3)); % transformed corner c4
-        %
-        % *** ***
-        
-        % compute extremal transformed corner coordinates
-        xmin = round(min([Hc1(1) Hc2(1) Hc3(1) Hc4(1)]));
-        xmax = round(max([Hc1(1) Hc2(1) Hc3(1) Hc4(1)]));
-        ymin = round(min([Hc1(2) Hc2(2) Hc3(2) Hc4(2)]));
-        ymax = round(max([Hc1(2) Hc2(2) Hc3(2) Hc4(2)]));
-    
-    case 'original'
-        % the image size is the same as the original one
-        xmin = 1;
-        xmax = ncols;
-        ymin = 1;
-        ymax = nrows;
-    
-    otherwise
-        error('size_mode should be fit/original ');
- end
 
 % create matrices of homogeneous coordinates
-[X,Y] = meshgrid(xmin:xmax, ymin:ymax);
-Hncols = xmax - xmin + 1;
-Hnrows = ymax - ymin + 1;
-Z = ones(Hnrows,Hncols);
+[X,Y] = meshgrid(x_min:x_max, y_min:y_max);
+Hnc = x_max - x_min + 1;
+Hnr = y_max - y_min + 1;
+Z = ones(Hnr,Hnc);
 
 
-% create a 3x(Hnrows*Hncols) matrix in order to transform all the 
-% coordinate points with matrix operations (thus avoiding the use of a for loop)
-XYZs = [X(:) Y(:) Z(:)]';
+% Matrix with all image points, to be transformed, in projective space
+XYZ = [X(:) Y(:) Z(:)]';
 
 % transform image
-Hi = inv(H); %tenim la inversa de la homografia que passem
-HiXYZs = Hi * XYZs; %
-HX = reshape(HiXYZs(1,:), Hnrows, Hncols);
-HY = reshape(HiXYZs(2,:), Hnrows, Hncols);
-HZ = reshape(HiXYZs(3,:), Hnrows, Hncols);
+Hi = inv(H); 
+Hi_XYZ = Hi * XYZ; %
+HX = reshape(Hi_XYZ(1,:), Hnr, Hnc);
+HY = reshape(Hi_XYZ(2,:), Hnr, Hnc);
+HZ = reshape(Hi_XYZ(3,:), Hnr, Hnc);
 HX = HX ./ HZ;
 HY = HY ./ HZ;
-% reshape(X,M,N) returns the M-by-N matrix whose elements
-% are taken columnwise from X.  An error results if X does
-% not have M*N elements.
 
-I2 = zeros(Hnrows, Hncols, nchan);
-for c=1:nchan,
-    I2(:,:,c) = interp2(double(I(:,:,c)), HX, HY, 'linear', 0);
+%Transformed image
+It = zeros(Hnr, Hnc, nchan);
+for l=1:nchan
+    It(:,:,l) = interp2(double(I(:,:,l)), HX, HY, 'linear', 0);
 end
-
