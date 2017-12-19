@@ -65,15 +65,19 @@ subplot(1, 3, 2); imshow(uint8(I2));
 
 % ToDo: decompose the affinity in four transformations: two
 % rotations, a scale, and a translation
-[U,S,V] = svd(H(1:2,1:2));
-A = U*S*V';
-H2 = zeros(3,3);
-H2(3,3) = 1;
-H2(1:2,3) = t';
-H2(1:2,1:2) = A;
+[U,D,V] = svd(H(1:2,1:2));
+R1_d = U*V';
+R2_d = V';
+S_d = D;
+T_d = H(1:2,3);
 
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
+A = R1_d*V*S_d*R2_d;
+H2 = zeros(3,3);
+H2(3,3) = 1;
+H2(1:2,3) = T_d;
+H2(1:2,1:2) = A;
 if(~any(any(round(H-H2))))
     disp('same matrices')
 end
