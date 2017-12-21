@@ -106,16 +106,16 @@ I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
 % indices of lines
-i = 227;
+i = 424; %i = 227;
 p1 = [A(i,1) A(i,2) 1]';
 p2 = [A(i,3) A(i,4) 1]';
-i = 367;
+i = 240; %i = 367;
 p3 = [A(i,1) A(i,2) 1]';
 p4 = [A(i,3) A(i,4) 1]';
-i = 534;
+i = 712; %i = 534;
 p5 = [A(i,1) A(i,2) 1]';
 p6 = [A(i,3) A(i,4) 1]';
-i = 576;
+i = 565; %i = 576;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
 % imshow(I);
@@ -136,8 +136,8 @@ hold on;
 t=1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
-plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
-plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'r');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'r');
 
 % ToDo: compute the homography that affinely rectifies the image
 % Compute the vanishing points 
@@ -149,8 +149,8 @@ linf = cross(v1,v2);
 linf = linf / linf(3);
 
 Hap =[  1    ,   0    ,   0;
-      0    ,   1    ,   0;
-    linf(1), linf(2), linf(3)];
+        0    ,   1    ,   0;
+      linf(1), linf(2), linf(3)];
 
 I2 = apply_H(I, Hap);
 figure; imshow(uint8(I2));
@@ -167,8 +167,8 @@ figure;imshow(uint8(I2));
 hold on;
 t=1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
-plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
-plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'r');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'r');
 plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
@@ -214,30 +214,36 @@ S =[s(1), s(2);
 %Cholesky decomposition to find K matrix
 K=chol(S);
 %Compute the inverse of K to fing de homography Hs<-a
-K=inv(K);
-H=[K(1,1) K(1,2) 0; K(2,1) K(2,2) 0; 0 0 1];
+Hsa = eye(3,3);
+Hsa(1:2,1:2) = inv(K);
 
 %Computing the homography to the lines
-L1=inv(H')*L1;
-M1=inv(H')*M1;
-L2=inv(H')*L2;
-M2=inv(H')*M2;
+L1=inv(Hsa')*L1;
+M1=inv(Hsa')*M1;
+L2=inv(Hsa')*L2;
+M2=inv(Hsa')*M2;
 
-I3 = apply_H(I2, H);
+I3 = apply_H(I2, Hsa);
 figure; imshow(uint8(I3));
 hold on;
 plot(t, -(L1(1)*t + L1(3)) / L1(2), 'y');
-plot(t, -(M1(1)*t + M1(3)) / M1(2), 'r');
 plot(t, -(L2(1)*t + L2(3)) / L2(2), 'y');
+plot(t, -(M1(1)*t + M1(3)) / M1(2), 'r');
 plot(t, -(M2(1)*t + M2(3)) / M2(2), 'r');
 
+% ToDo: to evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
 Lrc1 = [L1(1)/L1(3) L1(2)/L1(3)];
-Mrc1 = [M1(1)/M1(3) M1(2)/M1(3)];
 Lrc2 = [L2(1)/L2(3) L2(2)/L2(3)];
+Mrc1 = [M1(1)/M1(3) M1(2)/M1(3)];
 Mrc2 = [M2(1)/M2(3) M2(2)/M2(3)];
 
-a13 = acosd(abs(dot(Lrc1',Mrc1)/(norm(Lrc1)*norm(Mrc1)))); disp(a13);
-a24 = acosd(abs(dot(Lrc2',Mrc2)/(norm(Lrc2)*norm(Mrc2)))); disp(a24);
+disp(a13);
+disp(a24);
+
+arr13 = acosd(abs(dot(Lrc1',Mrc1)/(norm(Lrc1)*norm(Mrc1)))); disp(arr13);
+arr24 = acosd(abs(dot(Lrc2',Mrc2)/(norm(Lrc2)*norm(Mrc2)))); disp(arr24);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Affine and Metric Rectification of the left facade of image 0001
@@ -247,21 +253,21 @@ a24 = acosd(abs(dot(Lrc2',Mrc2)/(norm(Lrc2)*norm(Mrc2)))); disp(a24);
 %       Crop the initial image so that only the left facade is visible.
 %       Show the (properly) transformed lines that use in every step.
 
-I1=imread('Data/0001_s.png');
-I1=I1(1:end,1:474,:);
+I=imread('Data/0001_s.png');
+I=I(1:end,1:474,:);
 A = load('Data/0001_s_info_lines.txt');
 
 % indices of lines
-i = 614;
+i = 614; %i = 188;
 p1 = [A(i,1) A(i,2) 1]';
 p2 = [A(i,3) A(i,4) 1]';
-i = 541;
+i = 159; %i = 159;
 p3 = [A(i,1) A(i,2) 1]';
 p4 = [A(i,3) A(i,4) 1]';
-i = 159;
+i = 541; %i = 343;
 p5 = [A(i,1) A(i,2) 1]';
 p6 = [A(i,3) A(i,4) 1]';
-i = 645;
+i = 645; %i = 359;
 p7 = [A(i,1) A(i,2) 1]';
 p8 = [A(i,3) A(i,4) 1]';
 %lines
@@ -271,14 +277,104 @@ l3=cross(p5,p6);
 l4=cross(p7,p8);
 
 % show the chosen lines in the image
-figure;imshow(I1);
+figure;imshow(I);
 hold on;
 t=1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
-plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
-plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'r');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'r');
 
+% ToDo: compute the homography that affinely rectifies the image
+% Compute the vanishing points 
+v1 = cross(l1,l2);
+v2 = cross(l3,l4);
+
+% Compute the line at infinity
+linf = cross(v1,v2);
+linf = linf / linf(3);
+
+Hap =[  1    ,   0    ,   0;
+        0    ,   1    ,   0;
+      linf(1), linf(2), linf(3)];
+
+I2 = apply_H(I, Hap);
+figure; imshow(uint8(I2));
+
+% ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+
+lr1=inv(Hap')*l1;
+lr2=inv(Hap')*l2;
+lr3=inv(Hap')*l3;
+lr4=inv(Hap')*l4;
+
+% show the transformed lines in the transformed image
+figure;imshow(uint8(I2));
+hold on;
+t=1:0.1:1000;
+plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
+plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'r');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
+
+% 2 pairs of ortogonal lines
+L1=lr1; M1=lr3;
+L2=lr2; M2=lr4;
+
+% system of equations
+Eq = [L1(1)*M1(1), L1(1)*M1(2) + L1(2)*M1(1), L1(2)*M1(2); 
+      L2(1)*M2(1), L2(1)*M2(2) + L2(2)*M2(1), L2(2)*M2(2)];
+%computing the null vector and S matrix
+s = null(Eq);
+S =[s(1), s(2);
+    s(2), s(3)];
+
+%Cholesky decomposition to find K matrix
+K=chol(S);
+%Compute the inverse of K to fing de homography Hs<-a
+Hsa = eye(3,3);
+Hsa(1:2,1:2) = inv(K);
+
+%Computing the homography to the lines
+L1=inv(Hsa')*L1;
+M1=inv(Hsa')*M1;
+L2=inv(Hsa')*L2;
+M2=inv(Hsa')*M2;
+
+I3 = apply_H(I2, Hsa);
+figure; imshow(uint8(I3));
+hold on;
+plot(t, -(L1(1)*t + L1(3)) / L1(2), 'y');
+plot(t, -(L2(1)*t + L2(3)) / L2(2), 'y');
+plot(t, -(M1(1)*t + M1(3)) / M1(2), 'r');
+plot(t, -(M2(1)*t + M2(3)) / M2(2), 'r');
+
+% ToDo: to evaluate the results, compute the angle between the different pair 
+% of lines before and after the image transformation
+
+lc1 = [l1(1)/l1(3) l1(2)/l1(3)];
+lc2 = [l2(1)/l2(3) l2(2)/l2(3)];
+lc3 = [l3(1)/l3(3) l3(2)/l3(3)];
+lc4 = [l4(1)/l4(3) l4(2)/l4(3)];
+
+lrc1 = [lr1(1)/lr1(3) lr1(2)/lr1(3)];
+lrc2 = [lr2(1)/lr2(3) lr2(2)/lr2(3)];
+lrc3 = [lr3(1)/lr3(3) lr3(2)/lr3(3)];
+lrc4 = [lr4(1)/lr4(3) lr4(2)/lr4(3)];
+
+Lrc1 = [L1(1)/L1(3) L1(2)/L1(3)];
+Lrc2 = [L2(1)/L2(3) L2(2)/L2(3)];
+Mrc1 = [M1(1)/M1(3) M1(2)/M1(3)];
+Mrc2 = [M2(1)/M2(3) M2(2)/M2(3)];
+
+a13 = acosd(abs(dot(lc1',lc3)/(norm(lc1)*norm(lc3)))); disp(a13);
+a24 = acosd(abs(dot(lc2',lc4)/(norm(lc2)*norm(lc4)))); disp(a24);
+
+ar13 = acosd(abs(dot(lrc1',lrc3)/(norm(lrc1)*norm(lrc3)))); disp(ar13);
+ar24 = acosd(abs(dot(lrc2',lrc4)/(norm(lrc2)*norm(lrc4)))); disp(ar24);
+
+arr13 = acosd(abs(dot(Lrc1',Mrc1)/(norm(Lrc1)*norm(Mrc1)))); disp(arr13);
+arr24 = acosd(abs(dot(Lrc2',Mrc2)/(norm(Lrc2)*norm(Mrc2)))); disp(arr24);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
