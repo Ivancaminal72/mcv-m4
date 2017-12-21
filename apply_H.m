@@ -16,13 +16,13 @@ c4 = [nc nr 1]';
 H_c1=H*c1; H_c1=H_c1/(H_c1(3));
 H_c2=H*c2; H_c2=H_c2/(H_c2(3)); 
 H_c3=H*c3; H_c3=H_c3/(H_c3(3)); 
-Hc4=H*c4; Hc4=Hc4/(Hc4(3)); 
+H_c4=H*c4; H_c4=H_c4/(H_c4(3)); 
         
 % compute extremal transformed corner coordinates
-x_min = round(min([H_c1(1) H_c2(1) H_c3(1) Hc4(1)]));
-x_max = round(max([H_c1(1) H_c2(1) H_c3(1) Hc4(1)]));
-y_min = round(min([H_c1(2) H_c2(2) H_c3(2) Hc4(2)]));
-y_max = round(max([H_c1(2) H_c2(2) H_c3(2) Hc4(2)]));
+x_min = round(min([H_c1(1) H_c2(1) H_c3(1) H_c4(1)]));
+x_max = round(max([H_c1(1) H_c2(1) H_c3(1) H_c4(1)]));
+y_min = round(min([H_c1(2) H_c2(2) H_c3(2) H_c4(2)]));
+y_max = round(max([H_c1(2) H_c2(2) H_c3(2) H_c4(2)]));
 
 
 % create matrices of homogeneous coordinates
