@@ -32,9 +32,9 @@ figure; imshow(I); figure; imshow(uint8(I2));
 
 %% 1.2. Affinities
 % ToDo: generate a matrix H which produces an affine transformation
-theta=45;
-fi=30;
-s=[0.5, 1];
+theta=5;
+fi=10;
+s=[-1, -0.5];
 t=[30, 30];
 
 R1 = [cosd(theta), -sind(theta), 0;
@@ -379,6 +379,102 @@ arr24 = acosd(abs(dot(Lrc2',Mrc2)/(norm(Lrc2)*norm(Mrc2)))); disp(arr24);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Metric Rectification in a single step
 % Use 5 pairs of orthogonal lines (pages 55-57, Hartley-Zisserman book)
+I=imread('Data/0001_s.png');
+I=I(1:end,1:474,:);
+A = load('Data/0001_s_info_lines.txt');
 
+% indices of lines
+i = 614;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+l1=cross(p1,p2);
+i = 645;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+m1=cross(p1,p2);
+% indices of lines
+i = 541;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+l2=cross(p1,p2);
+i = 159;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+m2=cross(p1,p2);
+% indices of lines
+i = 188;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+l3=cross(p1,p2);
+i = 343;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+m3=cross(p1,p2);
+% indices of lines
+i = 188;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+l4=cross(p1,p2);
+i = 541;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+m4=cross(p1,p2);
+% indices of lines
+i = 159;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+l5=cross(p1,p2);
+i = 645;
+p1 = [A(i,1) A(i,2) 1]';
+p2 = [A(i,3) A(i,4) 1]';
+m5=cross(p1,p2);
+
+figure; imshow(I)
+hold on;
+t=1:0.1:1000;
+plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
+plot(t, -(m1(1)*t + m1(3)) / m1(2), 'y');
+
+figure; imshow(I)
+hold on;
+t=1:0.1:1000;
+plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
+plot(t, -(m2(1)*t + m2(3)) / m2(2), 'y');
+
+figure; imshow(I)
+hold on;
+t=1:0.1:1000;
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
+plot(t, -(m3(1)*t + m3(3)) / m3(2), 'y');
+
+figure; imshow(I)
+hold on;
+t=1:0.1:1000;
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+plot(t, -(m4(1)*t + m4(3)) / m4(2), 'y');
+
+figure; imshow(I)
+hold on;
+t=1:0.1:1000;
+plot(t, -(l5(1)*t + l5(3)) / l5(2), 'y');
+plot(t, -(m5(1)*t + m5(3)) / m5(2), 'y');
+
+Eq=[l1(1)*m1(1), (l1(1)*m1(2)+l1(2)*m1(1))/2, l1(2)*l1(2), (l1(1)*m1(3)+l1(3)*m1(1))/2, (l1(2)*m1(3)+l1(3)*m1(2))/2,l1(3)*m1(3);
+    l2(1)*m2(1), (l2(1)*m2(2)+l2(2)*m2(1))/2, l2(2)*l2(2), (l2(1)*m2(3)+l2(3)*m2(1))/2, (l2(2)*m2(3)+l2(3)*m2(2))/2,l2(3)*m2(3);
+    l3(1)*m3(1), (l3(1)*m3(2)+l3(2)*m3(1))/2, l3(2)*l3(2), (l3(1)*m3(3)+l3(3)*m3(1))/2, (l3(2)*m3(3)+l3(3)*m3(2))/2,l3(3)*m3(3);
+    l4(1)*m4(1), (l4(1)*m4(2)+l4(2)*m4(1))/2, l4(2)*l4(2), (l4(1)*m4(3)+l4(3)*m4(1))/2, (l4(2)*m4(3)+l4(3)*m4(2))/2,l4(3)*m4(3);
+    l5(1)*m5(1), (l5(1)*m5(2)+l5(2)*m5(1))/2, l5(2)*l5(2), (l5(1)*m5(3)+l5(3)*m5(1))/2, (l5(2)*m5(3)+l5(3)*m5(2))/2,l5(3)*m5(3)];
+s=null(Eq);
+a=s(1);
+b=s(2);
+c=s(3);
+d=s(4);
+e=s(5);
+f=1;
+C=[a, b/2, d/2; b/2, c, e/2; d/2, e/2, f];
+[U, D]=udu(C);
+H=U*D;
+I2=apply_H(I,H);
+figure; imshow(I2);
 
 
