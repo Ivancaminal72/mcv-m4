@@ -1,6 +1,6 @@
 function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 
-[Ncoords, Npoints] = size(x1);
+[~, Npoints] = size(x1);
 
 % ransac
 it = 0;
@@ -14,16 +14,18 @@ while it < max_it
     % test if it is the best model so far
     if length(inliers) > length(best_inliers)
         best_inliers = inliers;
-    end    
+    end
     
-    % update estimate of max_it (the number of trials) to ensure we pick, 
-    % with probability p, an initial data set with no outliers
-    fracinliers =  length(inliers)/Npoints;
-    pNoOutliers = 1 -  fracinliers^4;
-    pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
-    pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
-    p=0.99;
-    max_it = log(1-p)/log(pNoOutliers);
+    if ~isempty(inliers)
+        % update estimate of max_it (the number of trials) to ensure we pick,
+        % with probability p, an initial data set with no outliers
+        fracinliers =  length(inliers)/Npoints;
+        pNoOutliers = 1 -  fracinliers^4;
+        pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
+        pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
+        p=0.99;
+        max_it = log(1-p)/log(pNoOutliers);
+    end
     
     it = it + 1;
 end
@@ -31,27 +33,32 @@ end
 % compute H from all the inliers
 H = homography2d(x1(:,best_inliers), x2(:,best_inliers));
 idx_inliers = best_inliers;
+end
 
 
 function idx_inliers = compute_inliers(H, x1, x2, th)
     % Check that H is invertible
     if abs(log(cond(H))) > 15
-        idx_inliers = [];
-        return
+        error('no invertible');
+        %idx_inliers = [];
+        %return
     end
     
-
+    xb = inv(H)*x2;
+    xb2 = H*x1;
+    
     % compute the symmetric geometric error
-    d2 = % ToDo
+    d2 = pdist([x1;xb],'euclidean').^2 + pdist([x2;xb2],'euclidean').^2; 
     idx_inliers = find(d2 < th.^2);
+end
 
 
 function xn = normalise(x)    
     xn = x ./ repmat(x(end,:), size(x,1), 1);
-
+end
     
 function item = randomsample(npts, n)
-	a = [1:npts]; 
+	a = 1:npts; 
     item = zeros(1,n);    
     for i = 1:n
 	  % Generate random value in the appropriate range 
@@ -59,3 +66,4 @@ function item = randomsample(npts, n)
 	  item(i) = a(r);       % Select the rth element from the list
 	  a(r)    = a(end-i+1); % Overwrite selected element
     end                       % ... and repeat
+end
