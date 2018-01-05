@@ -1,4 +1,5 @@
 **/.idea
+**/*.pdf
 **/*.jpg
 **/*.pgm
 **/*.pklz
@@ -8,3 +9,4 @@
 **/*.asv
 **/*.ipynb_checkpoints
 **/Data
+/lab2/sift
