@@ -14,7 +14,7 @@ function H = homography2d(x1, x2)
         A(2*i-1:2*i,:) = Ai;
     end
     [~,~,V] = svd(A);
-    H=inv(T2)*reshape(V(:,size(V,2)),[3,3])*T1;
+    H=inv(T2)*reshape(V(:,size(V,2)),[3,3])'*T1;
 end
 
 function [ x_norm, T ] = DLT_normalization(x)

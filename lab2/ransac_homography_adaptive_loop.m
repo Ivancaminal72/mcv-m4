@@ -15,16 +15,15 @@ while it < max_it
         best_inliers = inliers;
     end
     
-    if ~isempty(inliers)
-        % update estimate of max_it (the number of trials) to ensure we pick,
-        % with probability p, an initial data set with no outliers
-        fracinliers =  length(inliers)/Npoints;
-        pNoOutliers = 1 -  fracinliers^4;
-        pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
-        pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
-        p=0.99;
-        max_it = log(1-p)/log(pNoOutliers);
-    end
+    % update estimate of max_it (the number of trials) to ensure we pick,
+    % with probability p, an initial data set with no outliers
+    fracinliers =  length(inliers)/Npoints;
+    pNoOutliers = 1 -  fracinliers^4;
+    pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
+    pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
+    p=0.99;
+    max_it = log(1-p)/log(pNoOutliers);
+    
     
     it = it + 1;
 end
@@ -41,7 +40,6 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
         idx_inliers = [];
         return
     end
-    disp('H is invertible')
     xb1 = inv(H)*x2;
     xb2 = H*x1;
     d2 = zeros(1, size(x1,2));
@@ -50,9 +48,7 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
         d2(i) = pdist([reshape(h2c(x1(:,i)),1,[]); reshape(h2c(xb1(:,i)),1,[])],'euclidean')^2 ...
               + pdist([reshape(h2c(x2(:,i)),1,[]); reshape(h2c(xb2(:,i)),1,[])],'euclidean')^2;
     end
-    disp(d2)
     idx_inliers = find(d2 < th^2);
-    disp(size(idx_inliers));
 end
 
 
