@@ -139,7 +139,7 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 
 xhat = reshape(P0(9+1:end),2,[]);
 xhat = [xhat ; ones(1,length(xhat))];
-xhatp = H*xhat;
+xhatp = Hab*xhat;
 
 figure;
 imshow(imargb);%image(imargb);
@@ -183,7 +183,7 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 
 xhat = reshape(P0(9+1:end),2,[]);
 xhat = [xhat ; ones(1,length(xhat))];
-xhatp = H*xhat;
+xhatp = Hbc*xhat;
 
 figure;
 imshow(imbrgb);%image(imbrgb);
