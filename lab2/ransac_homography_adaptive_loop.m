@@ -6,13 +6,13 @@ function [H, idx_inliers] = ransac_homography_adaptive_loop(x1, x2, th, max_it)
 it = 0;
 best_inliers = [];
 while it < max_it
-    
     points = randomsample(Npoints, 4);
     H = homography2d(x1(:,points), x2(:,points)); % ToDo: you have to create this function
     inliers = compute_inliers(H, x1, x2, th);
     
     % test if it is the best model so far
     if length(inliers) > length(best_inliers)
+        disp(inliers)
         best_inliers = inliers;
     end
     
@@ -39,17 +39,21 @@ end
 function idx_inliers = compute_inliers(H, x1, x2, th)
     % Check that H is invertible
     if abs(log(cond(H))) > 15
-        error('no invertible');
-        %idx_inliers = [];
-        %return
+        idx_inliers = [];
+        return
     end
-    
-    xb = inv(H)*x2;
+    disp('SUUU')
+    xb1 = inv(H)*x2;
     xb2 = H*x1;
-    
-    % compute the symmetric geometric error
-    d2 = pdist([x1;xb],'euclidean').^2 + pdist([x2;xb2],'euclidean').^2; 
-    idx_inliers = find(d2 < th.^2);
+    d2 = zeros(1, size(x1,2));
+    for i=1:size(x1,2)
+        % compute the symmetric geometric error
+        d2(i) = pdist([reshape(h2c(x1(:,i)),1,[]); reshape(h2c(xb1(:,i)),1,[])],'euclidean')^2 ...
+              + pdist([reshape(h2c(x2(:,i)),1,[]); reshape(h2c(xb2(:,i)),1,[])],'euclidean')^2;
+    end
+    disp(d2)
+    idx_inliers = find(d2 < th^2);
+    disp(size(idx_inliers));
 end
 
 
@@ -66,4 +70,21 @@ function item = randomsample(npts, n)
 	  item(i) = a(r);       % Select the rth element from the list
 	  a(r)    = a(end-i+1); % Overwrite selected element
     end                       % ... and repeat
+end
+
+function pc = h2c(ph)
+    [s1, s2] = size(ph);
+    if s1==1
+        pc = zeros(1,s2-1);
+        for i = 1:s2-1
+            pc(i) = ph(i)/ ph(s2);
+        end
+    elseif s2==1
+        pc = zeros(s1-1,1);
+        for i = 1:s1-1
+            pc(i) = ph(i)/ ph(s1);
+        end
+    else
+        error("not supported")
+    end
 end

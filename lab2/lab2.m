@@ -8,9 +8,9 @@ addpath('sift');
 
 %% Open images
 
-imargb = imread('Data/llanes/llanes_a.jpg');
-imbrgb = imread('Data/llanes/llanes_b.jpg');
-imcrgb = imread('Data/llanes/llanes_c.jpg');
+%imargb = imread('Data/llanes/llanes_a.jpg');
+%imbrgb = imread('Data/llanes/llanes_b.jpg');
+%imcrgb = imread('Data/llanes/llanes_c.jpg');
 
 imargb = imread('Data/castle_int/0016_s.png');
 imbrgb = imread('Data/castle_int/0015_s.png');
