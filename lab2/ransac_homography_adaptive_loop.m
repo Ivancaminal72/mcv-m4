@@ -12,7 +12,6 @@ while it < max_it
     
     % test if it is the best model so far
     if length(inliers) > length(best_inliers)
-        disp(inliers)
         best_inliers = inliers;
     end
     
@@ -42,7 +41,7 @@ function idx_inliers = compute_inliers(H, x1, x2, th)
         idx_inliers = [];
         return
     end
-    disp('SUUU')
+    disp('H is invertible')
     xb1 = inv(H)*x2;
     xb2 = H*x1;
     d2 = zeros(1, size(x1,2));

@@ -6,15 +6,15 @@ function H = homography2d(x1, x2)
     Ai = zeros(2,9);
     
     for i=1:size(x1,2)
-        Ai(1,4:6) = -(x1(3,i)*(x2(:,i)));
-        Ai(1,7:9) =  (x1(2,i)*(x2(:,i)));
-        Ai(2,1:3) =  (x1(3,i)*(x2(:,i)));
-        Ai(2,7:9) = -(x1(1,i)*(x2(:,i)));
+        Ai(1,4:6) = -(x2(3,i)*(x1(:,i)));
+        Ai(1,7:9) =  (x2(2,i)*(x1(:,i)));
+        Ai(2,1:3) =  (x2(3,i)*(x1(:,i)));
+        Ai(2,7:9) = -(x2(1,i)*(x1(:,i)));
         
-        A(i:i+1,:) = Ai;
+        A(2*i-1:2*i,:) = Ai;
     end
     [~,~,V] = svd(A);
-    H=inv(T2')*reshape(V(:,size(V,2)),[3,3])*T1;
+    H=inv(T2)*reshape(V(:,size(V,2)),[3,3])*T1;
 end
 
 function [ x_norm, T ] = DLT_normalization(x)
