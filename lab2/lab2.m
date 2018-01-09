@@ -111,8 +111,8 @@ title('Mosaic A-B-C');
 
 % Homography ab
 
-x = points_a(1:2, inliers_ab(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_b(1:2, inliers_ab(2,:)); %      point correspondences we will refine with the geometric method
+x = points_a(1:2, matches_ab(1,inliers_ab));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b(1:2, matches_ab(2,inliers_ab)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
 
@@ -155,8 +155,8 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 
 %%  Homography bc
 
-x = points_b(1:2, inliers_bc(1,:));  %ToDo: set the non-homogeneous point coordinates of the 
-xp = points_c(1:2, inliers_bc(2,:)); %      point correspondences we will refine with the geometric method
+x = points_b(1:2, matches_bc(1,inliers_bc));  %ToDo: set the non-homogeneous point coordinates of the 
+xp = points_c(1:2, matches_bc(2,inliers_bc)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hbc(:) ; x(:) ];      % The parameters or independent variables
 

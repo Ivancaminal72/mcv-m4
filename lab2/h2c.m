@@ -11,6 +11,6 @@ function pc = h2c(ph)
             pc(i) = ph(i)/ ph(s1);
         end
     else
-        error("not supported")
+        error('not supported')
     end
 end
