@@ -1,4 +1,4 @@
-function F = fundamental_matrix(x1_test, x2_test)
+function F_rank2 = fundamental_matrix(x1_test, x2_test)
     [p1, T1] = normalise2dpts(x1_test);
     [p2, T2] = normalise2dpts(x2_test);
     
@@ -14,9 +14,9 @@ function F = fundamental_matrix(x1_test, x2_test)
 
     
     [~,~,V] = svd(W);
-    F = reshape(V(:,size(V,2)),[3,3])';
-    [U,D,V] = svd(F);
+    F_rank3 = reshape(V(:,size(V,2)),[3,3])';
+    [U,D,V] = svd(F_rank3);
     D(3,3)=0;
-    F_es = U*D*V';
-    F_es = T2'*F_es*T1;
+    F_rank2 = U*D*V';
+    F_rank2 = T2'*F_rank2*T1;
 end
