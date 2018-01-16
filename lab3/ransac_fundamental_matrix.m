@@ -35,25 +35,25 @@ idx_inliers = best_inliers;
 
 
 function idx_inliers = compute_inliers(F, p1, p2, th)
-    % Check that H is invertible
-    if abs(log(cond(F))) > 15
-        idx_inliers = [];
-        return
-    end
-    disp('SUUH');
+%     % Check that H is invertible
+%     if abs(log(cond(F))) > 15
+%         idx_inliers = [];
+%         return
+%     end
     
     % transformed points (in both directions)
     Fp1 = F * p1;
-    Fip2 = inv(F) * p2;
+    Ftp2 = F' * p2;
     
     % normalise homogeneous coordinates (third coordinate to 1)   
     Fp1 = normalise(Fp1);
-    Fip2 = normalise(Fip2); 
+    Ftp2 = normalise(Ftp2); 
     
     % compute the symmetric geometric error
-    d2 = sum(((p2'*Fp1)^2)/((Fp1(1,:))^2 + (Fp1(2,:))^2 ... 
-                + (Fip2(1,:))^2 + (Fip2(2,:))^2),1);
+    d2 = sum(((p2'*Fp1).^2)./((Fp1(1,:)).^2 + (Fp1(2,:)).^2 ... 
+                + (Ftp2(1,:)).^2 + (Ftp2(2,:)).^2),1);
     idx_inliers = find(d2 < th.^2);
+    
 
 
 function xn = normalise(x)    
