@@ -7,7 +7,7 @@ function F_es = fundamental_matrix(x1_test, x2_test)
          (p2(1,:))'         , (p2(2,:))'         , ones(8,1)];
     
     [~,~,V] = svd(W);
-    F = reshape(V(:,size(V,2)),[3,3]);
+    F = reshape(V(:,size(V,2)),[3,3])';
     [U,D,V] = svd(F);
     D(3,3)=0;
     F_es = U*D*V';
