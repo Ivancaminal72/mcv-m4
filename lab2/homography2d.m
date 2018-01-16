@@ -22,10 +22,10 @@ function [ x_norm, T ] = DLT_normalization(x)
     x(2,1:4)=x(2,1:4)./x(3,1:4);
     x(3,1:4)=1;
     
-    x_mean = mean(x(1:2,1:4));
-    x_ori(1,1:4) = x(1,1:4)-x_mean(1);
-    x_ori(2,1:4) = x(2,1:4)-x_mean(2);
-    dist = sqrt(x_ori(1,1:4).^2 + x_ori(2,1:4).^2);
+    x_mean = mean(x(1:2,:));
+    x_ori(1,:) = x(1,:)-x_mean(1);
+    x_ori(2,:) = x(2,:)-x_mean(2);
+    dist = sqrt(x_ori(1,:).^2 + x_ori(2,:).^2);
     meandist = mean(dist(:).^2);  
     s = sqrt(2)/meandist;
     T = [s   0   -s*x_mean(1)

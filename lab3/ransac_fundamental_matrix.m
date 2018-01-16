@@ -21,7 +21,7 @@ while it < max_it
     % update estimate of max_it (the number of trials) to ensure we pick, 
     % with probability p, an initial data set with no outliers
     fracinliers =  length(inliers)/Npoints;
-    pNoOutliers = 1 -  fracinliers^4;
+    pNoOutliers = 1 -  fracinliers^8;
     pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
     pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
     max_it = log(1-p)/log(pNoOutliers);
@@ -34,26 +34,25 @@ F = fundamental_matrix(p1(:,best_inliers), p2(:,best_inliers));
 idx_inliers = best_inliers;
 
 
-function idx_inliers = compute_inliers(H, x1, x2, th)
+function idx_inliers = compute_inliers(F, p1, p2, th)
     % Check that H is invertible
-    if abs(log(cond(H))) > 15
+    if abs(log(cond(F))) > 15
         idx_inliers = [];
         return
     end
+    disp('SUUH');
     
     % transformed points (in both directions)
-    Hx1 = H * x1;
-    Hix2 = inv(H) * x2;
+    Fp1 = F * p1;
+    Fip2 = inv(F) * p2;
     
-    % normalise homogeneous coordinates (third coordinate to 1)
-    x1 = normalise(x1);
-    x2 = normalise(x2);     
-    Hx1 = normalise(Hx1);
-    Hix2 = normalise(Hix2); 
+    % normalise homogeneous coordinates (third coordinate to 1)   
+    Fp1 = normalise(Fp1);
+    Fip2 = normalise(Fip2); 
     
     % compute the symmetric geometric error
-    d2 = sum(((x2'*Hx1)^2)/((Hx1(1,:))^2 + (Hx1(2,:))^2 ... 
-                + (Hix2(1,:))^2 + (Hix2(2,:))^2),1);
+    d2 = sum(((p2'*Fp1)^2)/((Fp1(1,:))^2 + (Fp1(2,:))^2 ... 
+                + (Fip2(1,:))^2 + (Fip2(2,:))^2),1);
     idx_inliers = find(d2 < th.^2);
 
 
