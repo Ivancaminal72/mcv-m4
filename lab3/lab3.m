@@ -22,7 +22,7 @@ x2_test = P2 * X;
 F_es = fundamental_matrix(x1_test, x2_test);
 
 % Real fundamental matrix
-F_gt =  % ToDo: write the expression of the real fundamental matrix for P1 and P2
+F_gt = [0 -t(3) t(2); t(3) 0 -t(1); -t(2) t(1) 0] * R;  % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
 F_gt / norm(F_gt)
@@ -61,7 +61,7 @@ p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
 % ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
 [F, inliers] = ransac_fundamental_matrix(p1, p2, 2.0); 
-
+length(inliers)
 % show inliers
 figure;
 plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Stacking', 'v');
@@ -72,8 +72,8 @@ vgg_gui_F(im1rgb, im2rgb, F');
 
 %% Plot some epipolar lines
 
-l2 = ... % epipolar lines in image 2 % ToDo
-l1 = ... % epipolar lines in image 1 % ToDo
+l2 = F*p1; % epipolar lines in image 2 % ToDo
+l1 = F'*p2;% epipolar lines in image 1 % ToDo
 
 % choose three random indices
 m1 = inliers(10);

@@ -24,7 +24,7 @@ while it < max_it
     pNoOutliers = 1 -  fracinliers^8;
     pNoOutliers = max(eps, pNoOutliers);  % avoid division by -Inf
     pNoOutliers = min(1-eps, pNoOutliers);% avoid division by 0
-    max_it = log(1-p)/log(pNoOutliers);
+    max_it = min(max_it, log(1-p)/log(pNoOutliers));
     
     it = it + 1;
 end
@@ -35,12 +35,6 @@ idx_inliers = best_inliers;
 
 
 function idx_inliers = compute_inliers(F, p1, p2, th)
-%     % Check that H is invertible
-%     if abs(log(cond(F))) > 15
-%         idx_inliers = [];
-%         return
-%     end
-    
     % transformed points (in both directions)
     Fp1 = F * p1;
     Ftp2 = F' * p2;
@@ -49,9 +43,13 @@ function idx_inliers = compute_inliers(F, p1, p2, th)
     Fp1 = normalise(Fp1);
     Ftp2 = normalise(Ftp2); 
     
-    % compute the symmetric geometric error
-    d2 = sum(((p2'*Fp1).^2)./((Fp1(1,:)).^2 + (Fp1(2,:)).^2 ... 
+    % compute the numerator of the Sampson error
+    p2tFp1= diag(p2'*Fp1);
+    
+    % compute the Sampson error
+    d2 = sum((p2tFp1.^2)./((Fp1(1,:)).^2 + (Fp1(2,:)).^2 ... 
                 + (Ftp2(1,:)).^2 + (Ftp2(2,:)).^2),1);
+    
     idx_inliers = find(d2 < th.^2);
     
 
