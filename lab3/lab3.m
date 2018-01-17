@@ -60,7 +60,7 @@ p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
 % ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 2.0); 
+[F, inliers] = ransac_fundamental_matrix(p1, p2, 50.0); 
 length(inliers)
 % show inliers
 figure;

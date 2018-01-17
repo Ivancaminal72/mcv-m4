@@ -12,7 +12,6 @@ function F_rank2 = fundamental_matrix(x1_test, x2_test)
     v2 = p2(2,:);
     W = [ (u1.*u2)', (v1.*u2)', u2', (u1.*v2)', (v1.*v2)', v2', u1', v1', ones(length(p1),1) ];
 
-    
     [~,~,V] = svd(W);
     F_rank3 = reshape(V(:,size(V,2)),[3,3])';
     [U,D,V] = svd(F_rank3);
