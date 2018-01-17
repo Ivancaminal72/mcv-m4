@@ -155,13 +155,34 @@ matches_12 = siftmatch(desc_1, desc_2);
 matches_13 = siftmatch(desc_1, desc_3);
 matches_14 = siftmatch(desc_1, desc_4);
 
-F12 = fundamental_matrix([points_1(1:2,matches_12(1,:)); ones(1,length(matches_12))], ...
-                         [points_2(1:2,matches_12(2,:)); ones(1,length(matches_12))]);
-F13 = fundamental_matrix([points_1(1:2,matches_13(1,:)); ones(1,length(matches_13))], ...
-                         [points_3(1:2,matches_13(2,:)); ones(1,length(matches_13))]);
-F14 = fundamental_matrix([points_1(1:2,matches_14(1,:)); ones(1,length(matches_14))], ...
-                         [points_4(1:2,matches_14(2,:)); ones(1,length(matches_14))]);
-
+th = 0.0001;
+bi = 1;
+while length(bi) < 8
+    th = th + 0.00005;
+    fprintf('Actual threshold %g \n', th);
+    [F12, bi] = ransac_fundamental_matrix([points_1(1:2,matches_12(1,:)); ones(1,length(matches_12))], ...
+                                          [points_2(1:2,matches_12(2,:)); ones(1,length(matches_12))], th);
+    if(length(bi) < 8)
+        continue;
+    else
+        disp(length(bi));
+        
+    end
+    [F13, bi] = ransac_fundamental_matrix([points_1(1:2,matches_13(1,:)); ones(1,length(matches_13))], ...
+                                          [points_3(1:2,matches_13(2,:)); ones(1,length(matches_13))], th);
+    if(length(bi) < 8)
+        continue;
+    else
+        disp(length(bi));
+    end
+    [F14, bi] = ransac_fundamental_matrix([points_1(1:2,matches_14(1,:)); ones(1,length(matches_14))], ...
+                                          [points_4(1:2,matches_14(2,:)); ones(1,length(matches_14))], th);
+    if(length(bi) < 8)
+        continue;
+    else
+        disp(length(bi));
+    end
+end
 %% Plot the car trajectory (keypoint idx_car_I1 in image 1)
 
 % ToDo: complete the code

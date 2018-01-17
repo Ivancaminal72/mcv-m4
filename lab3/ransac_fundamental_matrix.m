@@ -39,16 +39,26 @@ function idx_inliers = compute_inliers(F, p1, p2, th)
     Fp1 = F * p1;
     Ftp2 = F' * p2;
     
-    % normalise homogeneous coordinates (third coordinate to 1)   
-    Fp1 = normalise(Fp1);
-    Ftp2 = normalise(Ftp2); 
-    
     % compute the numerator of the Sampson error
-    p2tFp1= diag(p2'*Fp1);
+    p2tFp1= diag(p2'*Fp1)';
     
     % compute the Sampson error
-    d2 = sum((p2tFp1.^2)./((Fp1(1,:)).^2 + (Fp1(2,:)).^2 ... 
-                + (Ftp2(1,:)).^2 + (Ftp2(2,:)).^2),1);
+    d2 = p2tFp1.^2 ./(Fp1(1,:).^2 + Fp1(2,:).^2 ... 
+                + Ftp2(1,:).^2 + Ftp2(2,:).^2);
+    
+    idx_inliers = find(d2 < th.^2);
+    
+    function idx_inliers = compute_inlierss(F, x1, x2, th)
+    x1=normalise(x1);
+    x2=normalise(x2);
+    x2tFx1 = zeros(1,length(x1));
+	for n = 1:length(x1)
+	    x2tFx1(n) = x2(:,n)'*F*x1(:,n);
+    end
+    Fx1 = F*x1;
+    Ftx2 = F'*x2;
+    
+    d2 =  x2tFx1.^2 ./ (Fx1(1,:).^2 + Fx1(2,:).^2 + Ftx2(1,:).^2 + Ftx2(2,:).^2);
     
     idx_inliers = find(d2 < th.^2);
     
