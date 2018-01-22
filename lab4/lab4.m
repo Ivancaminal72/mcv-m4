@@ -2,7 +2,7 @@
 %% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('./../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Triangulation
@@ -93,18 +93,18 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = ...
+%E = 
 
 
 % ToDo: write the camera projection matrix for the first camera
-P1 = ...
+%P1 = 
 
 % ToDo: write the four possible matrices for the second camera
 Pc2 = {};
-Pc2{1} = ...
-Pc2{2} = ...
-Pc2{3} = ...
-Pc2{4} = ...
+%Pc2{1} = 
+%Pc2{2} = ...
+%Pc2{3} = ...
+%Pc2{4} = ...
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -124,7 +124,7 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = ...
+%P2 = ...
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -145,7 +145,7 @@ plot_camera(P1,w,h);
 plot_camera(P2,w,h);
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(3,i), -Xe(2,i), 5^2, [r(i) g(i) b(i)]/255, 'filled');
-end;
+end
 axis equal;
 
 
