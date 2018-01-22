@@ -78,7 +78,7 @@ plotmatches(I{1}, I{2}, points{1}, points{2}, inlier_matches, 'Stacking', 'v');
 x1 = points{1}(:, inlier_matches(1, :));
 x2 = points{2}(:, inlier_matches(2, :));
 
-%vgg_gui_F(Irgb{1}, Irgb{2}, F');
+vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
 
@@ -93,19 +93,28 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-%E = 
+E = K*F*inv(K);
 
 
 % ToDo: write the camera projection matrix for the first camera
-%P1 = 
+P1 = eye(3,4);
 
 % ToDo: write the four possible matrices for the second camera
+[U1,D,V] = svd(E);
+W = [0, -1, 0;
+     1,  0, 0;
+     0,  0, 1];
+T1=U(:,3);
 Pc2 = {};
-%Pc2{1} = 
-%Pc2{2} = ...
-%Pc2{3} = ...
-%Pc2{4} = ...
+Pc2{1} = [U*W*V',T1];
+Pc2{2} = [U*W*V',-U(:,3)];
+Pc2{3} = [U*W'*V',T1];
+Pc2{4} = [U*W'*V',-U(:,3)];
 
+Tx=[0 -U(3,3) U(2,3);
+    U(3,3) 0 -U(1,3);
+    -U(2,3) U(1,3) 0];
+R=inv(-Tx)*E;
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
 % Let R be a rotation matrix, you may check:
@@ -116,8 +125,8 @@ Pc2 = {};
 % plot the first camera and the four possible solutions for the second
 figure;
 plot_camera(P1,w,h);
-plot_camera(Pc2{1},w,h);
-plot_camera(Pc2{2},w,h);
+% plot_camera(Pc2{1},w,h);
+% plot_camera(Pc2{2},w,h);
 plot_camera(Pc2{3},w,h);
 plot_camera(Pc2{4},w,h);
 
