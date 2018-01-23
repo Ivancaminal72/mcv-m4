@@ -37,7 +37,7 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                 x_min = 1;
             end
             best_x=Inf;                        
-            if match_cost == 'SSD'
+            if match_cost == "SSD"
                 ssd_min=Inf;
                 for x = x_min:x_max
                     patchL=imL(i:i+win_size-1,j:j+win_size-1);
@@ -48,7 +48,7 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                         ssd_min = ssd;
                     end
                 end
-            elseif match_cost == 'NCC'         
+            elseif match_cost == "NCC"         
                 ncc_max=-Inf;
                 for x = x_min:x_max
                     patchL=imL(i:i+win_size-1,j:j+win_size-1);
@@ -65,7 +65,7 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                         ncc_max = ncc;
                     end
                 end
-            elseif match_cost == 'BW'   
+            elseif match_cost == "BW"   
                 E_min=Inf;
                 for x = x_min:x_max
                     patchL=imL(i:i+win_size-1,j:j+win_size-1);
@@ -76,7 +76,8 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                         best_x = x;
                         E_min = E;
                     end
-                end                     
+                end
+            end
             disparity(i,j)= max(dmin,abs(best_x-j))/dmax;
         end
     end

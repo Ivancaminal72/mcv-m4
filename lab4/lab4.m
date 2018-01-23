@@ -287,7 +287,7 @@ imR = sum(double(imR_rgb), 3) / 3 / 255;
 
 window_size = 9;
 %Compute disparity between imL and imR
-disparity = stereo_computation(imL, imR, 0, 16, window_size, 'BW');
+disparity = stereo_computation(imL, imR, 0, 16, window_size, "BW");
 
 figure;
 imshow(disparity);
