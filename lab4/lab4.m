@@ -118,10 +118,10 @@ T1=U(:,3);
 T2=-U(:,3);
 
 Pc2 = {};
-Pc2{1} = [R1,T1];
-Pc2{2} = [R1,T2];
-Pc2{3} = [R2,T1];
-Pc2{4} = [R2,T2];
+Pc2{1} = K*[R1,T1];
+Pc2{2} = K*[R1,T2];
+Pc2{3} = K*[R2,T1];
+Pc2{4} = K*[R2,T2];
 
 % plot the first camera and the four possible solutions for the second
 figure;
