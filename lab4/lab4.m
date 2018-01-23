@@ -134,16 +134,21 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-%P2 = ...
 
-% Triangulate all matches.
-N = size(x1,2);
-X = zeros(4,N);
-for i = 1:N
-    X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+for c=1:4
+    P2 = Pc2{c};
+    % Triangulate all matches.
+    N = size(x1,2);
+    X = zeros(4,N);
+    for i = 1:N
+        X(:,i) = triangulate(x1(:,i), x2(:,i), P1, P2, [w h]);
+        Xc1 = P1*X;
+        Xc2 = P2*X;
+    end
+    if(all(Xc1(3,:) > 0) && all(Xc2(3,:) > 0))
+        break;
+    end
 end
-
-
 
 %% Plot with colors
 r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
@@ -162,8 +167,27 @@ axis equal;
 %% Compute reprojection error.
 
 % ToDo: compute the reprojection errors
-%       plot the histogram of reprojection errors, and
-%       plot the mean reprojection error
+%   Reprojection of the points (referenciated in the world coordinate system)
+%   into the two camera planes.
+    X1p = euclid(P1*X);
+    X2p = euclid(P2*X);
+    dsts1 = zeros(1,length(X1p));
+    dsts2 = zeros(1,length(X1p));
+    for i = 1:length(X1p)
+        dsts1(i) = pdist([X1p(:,i)';x1(:,i)'], 'euclidean');
+        dsts2(i) = pdist([X2p(:,i)';x2(:,i)'], 'euclidean');
+    end
+    
+%   Plot the histogram of reprojection errors, and
+%   plot the mean reprojection error
+    mu1 = mean(dsts1);
+    mu2 = mean(dsts2);
+    hold on;
+    histogram(dsts1)
+    histogram(dsts2)
+    line([mu1 mu1],ylim,'LineWidth', 2, 'Color','b');
+    line([mu2 mu2],ylim,'LineWidth', 2, 'Color','r');
+    hold off;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
@@ -192,6 +216,19 @@ axis equal;
 % Note 2: For this first set of images use 0 as minimum disparity 
 % and 16 as the the maximum one.
 
+% Read images
+imL_rgb = imread('Data/scene1.row3.col3.ppm');
+imR_rgb = imread('Data/scene1.row3.col4.ppm');
+imL = sum(double(imL_rgb), 3) / 3 / 255;
+imR = sum(double(imR_rgb), 3) / 3 / 255;
+
+
+window_size = 30;
+%Compute disparity between imL and imR
+disparity = stereo_computation(imL, imR, 0, 16, window_size, 'SSD');
+
+figure;
+imshow(disparity);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Depth map computation with local methods (NCC)
@@ -202,16 +239,34 @@ axis equal;
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
+window_size = 30;
+%Compute disparity between imL and imR
+disparity = stereo_computation(imL, imR, 0, 16, window_size, 'NCC');
+
+figure;
+imshow(disparity);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Depth map computation with local methods
 
 % Data images: '0001_rectified_s.png','0002_rectified_s.png'
+imL_rgb = imread('Data/0001_rectified_s.png');
+imR_rgb = imread('Data/0002_rectified_s.png');
+imL = sum(double(imL_rgb), 3) / 3 / 255;
+imR = sum(double(imR_rgb), 3) / 3 / 255;
 
 % Test the functions implemented in the previous section with the facade
 % images. Try different matching costs and window sizes and comment the
 % results.
 % Notice that in this new data the minimum and maximum disparities may
 % change.
+
+window_size = 30;
+%Compute disparity between imL and imR
+disparity = stereo_computation(imL, imR, 0, 16, window_size, 'NCC');
+
+figure;
+imshow(disparity);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. Bilateral weights
