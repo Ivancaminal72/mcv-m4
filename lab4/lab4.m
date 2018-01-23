@@ -279,6 +279,19 @@ imshow(disparity);
 %
 % Note: Use grayscale images (the paper uses color images)
 
+% Read images
+imL_rgb = imread('Data/scene1.row3.col3.ppm');
+imR_rgb = imread('Data/scene1.row3.col4.ppm');
+imL = sum(double(imL_rgb), 3) / 3 / 255;
+imR = sum(double(imR_rgb), 3) / 3 / 255;
+
+window_size = 9;
+%Compute disparity between imL and imR
+disparity = stereo_computation(imL, imR, 0, 16, window_size, 'BW');
+
+figure;
+imshow(disparity);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Stereo computation with Belief Propagation
 

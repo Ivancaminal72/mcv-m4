@@ -10,7 +10,17 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
     end
     disparity = zeros(size(imL));
     [height,width] = size(imL);
-    W = (1/(win_size^2))*ones(win_size,win_size);
+    if(match_cost == 'BW')%Define bilateral weigths
+        WL = zeros(size(win_size));
+        for i = 1:length(win_size)
+            for j = 1:length(win_size)                
+                WL(i,j) = exp(-(pdist([[i,j];[padding,padding]],'euclidean'))/win_size);
+            end
+        end
+        WR = WL;
+    else %Define standard weights        
+        W = (1/(win_size^2))*ones(win_size,win_size);
+    end
     
     imL = padarray(imL, [padding, padding]);
     imR = padarray(imR, [padding, padding]);
@@ -26,9 +36,9 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
             else
                 x_min = 1;
             end
-            best_x=Inf;
-            ssd_min=Inf;
-            if match_cost == 'SSD'           
+            best_x=Inf;                        
+            if match_cost == 'SSD'
+                ssd_min=Inf;
                 for x = x_min:x_max
                     patchL=imL(i:i+win_size-1,j:j+win_size-1);
                     patchR=imR(i:i+win_size-1,x:x+win_size-1);
@@ -38,8 +48,7 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                         ssd_min = ssd;
                     end
                 end
-            elseif match_cost == 'NCC'
-                best_x=Inf;
+            elseif match_cost == 'NCC'         
                 ncc_max=-Inf;
                 for x = x_min:x_max
                     patchL=imL(i:i+win_size-1,j:j+win_size-1);
@@ -55,8 +64,19 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
                         best_x = x;
                         ncc_max = ncc;
                     end
-                end                
-            end            
+                end
+            elseif match_cost == 'BW'   
+                E_min=Inf;
+                for x = x_min:x_max
+                    patchL=imL(i:i+win_size-1,j:j+win_size-1);
+                    patchR=imR(i:i+win_size-1,x:x+win_size-1);           
+                    e=sum(sum(abs(patchL-patchR)));
+                    E=sum(sum(WL.*WR.*e))/sum(sum(WL.*WR));
+                    if(E < E_min)
+                        best_x = x;
+                        E_min = E;
+                    end
+                end                     
             disparity(i,j)= max(dmin,abs(best_x-j))/dmax;
         end
     end
