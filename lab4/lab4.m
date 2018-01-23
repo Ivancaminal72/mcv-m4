@@ -1,8 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
 
-
-addpath('./../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Triangulation
@@ -81,8 +80,6 @@ x2 = points{2}(:, inlier_matches(2, :));
 vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
-
-
 %% Compute candidate camera matrices.
 
 % Camera calibration matrix
@@ -93,40 +90,44 @@ K = H * K;
 
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = K*F*inv(K);
-
+E = K'*F*K;
 
 % ToDo: write the camera projection matrix for the first camera
-P1 = eye(3,4);
+P1 = K*eye(3,4);
+%P1(1:3,1:3) = K; %????
 
 % ToDo: write the four possible matrices for the second camera
-[U1,D,V] = svd(E);
+[U,D,V] = svd(E);
+
 W = [0, -1, 0;
      1,  0, 0;
      0,  0, 1];
-T1=U(:,3);
-Pc2 = {};
-Pc2{1} = [U*W*V',T1];
-Pc2{2} = [U*W*V',-U(:,3)];
-Pc2{3} = [U*W'*V',T1];
-Pc2{4} = [U*W'*V',-U(:,3)];
-
-Tx=[0 -U(3,3) U(2,3);
-    U(3,3) 0 -U(1,3);
-    -U(2,3) U(1,3) 0];
-R=inv(-Tx)*E;
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
-% Let R be a rotation matrix, you may check:
-% if det(R) < 0
-%     R = -R;
-% end
+% Let Rx be rotation matrices, you may check:
+R1= U*W*V';
+if det(R1) < 0
+    R1 = -R1;
+end
+R2= U*W'*V';
+if det(R2) < 0
+    R2 = -R2;
+end
+% Let Tx be translation vectors
+T1=U(:,3);
+T2=-U(:,3);
+
+Pc2 = {};
+Pc2{1} = [R1,T1];
+Pc2{2} = [R1,T2];
+Pc2{3} = [R2,T1];
+Pc2{4} = [R2,T2];
 
 % plot the first camera and the four possible solutions for the second
 figure;
 plot_camera(P1,w,h);
-% plot_camera(Pc2{1},w,h);
-% plot_camera(Pc2{2},w,h);
+plot_camera(Pc2{1},w,h);
+plot_camera(Pc2{2},w,h);
 plot_camera(Pc2{3},w,h);
 plot_camera(Pc2{4},w,h);
 
