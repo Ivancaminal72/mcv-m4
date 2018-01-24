@@ -223,7 +223,7 @@ imL = sum(double(imL_rgb), 3) / 3 / 255;
 imR = sum(double(imR_rgb), 3) / 3 / 255;
 
 
-window_size = 30;
+window_size = 9;
 %Compute disparity between imL and imR
 disparity = stereo_computation(imL, imR, 0, 16, window_size, 'SSD');
 
@@ -239,7 +239,7 @@ imshow(disparity);
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
 
-window_size = 30;
+window_size = 9;
 %Compute disparity between imL and imR
 disparity = stereo_computation(imL, imR, 0, 16, window_size, 'NCC');
 
@@ -261,7 +261,7 @@ imR = sum(double(imR_rgb), 3) / 3 / 255;
 % Notice that in this new data the minimum and maximum disparities may
 % change.
 
-window_size = 30;
+window_size = 9;
 %Compute disparity between imL and imR
 disparity = stereo_computation(imL, imR, 0, 16, window_size, 'NCC');
 
@@ -285,7 +285,7 @@ imR_rgb = imread('Data/scene1.row3.col4.ppm');
 imL = sum(double(imL_rgb), 3) / 3 / 255;
 imR = sum(double(imR_rgb), 3) / 3 / 255;
 
-window_size = 9;
+window_size = 30;
 %Compute disparity between imL and imR
 disparity = stereo_computation(imL, imR, 0, 16, window_size, "BW");
 

@@ -14,7 +14,7 @@ function disparity = stereo_computation(imL, imR, dmin, dmax, win_size, match_co
         WL = zeros(size(win_size));
         for i = 1:length(win_size)
             for j = 1:length(win_size)                
-                WL(i,j) = exp(-(pdist([[i,j];[padding,padding]],'euclidean'))/win_size);
+                WL(i,j) = exp(-(pdist([[i,j];[padding,padding]],'euclidean'))/win_size.^2);
             end
         end
         WR = WL;
