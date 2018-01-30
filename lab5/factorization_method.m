@@ -1,7 +1,6 @@
 function [Pproj, Xproj] = factorization_method(x1, x2, initialization, th1, th2)
     [x1,T1]=normalise2dpts(x1);
     [x2,T2]=normalise2dpts(x2);
-    M = [x1; x2];
     lambda = ones(2,length(x2));    
     
     if (initialization == "strum")
