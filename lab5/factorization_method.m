@@ -2,22 +2,23 @@ function [Pproj, Xproj] = factorization_method(x1, x2, initialization, th1, th2)
     [x1,T1]=normalise2dpts(x1);
     [x2,T2]=normalise2dpts(x2);
     M = [x1; x2];
-
+    lambda = ones(2,length(x2));    
     
-    if (initialization == "ones")
-        lambda = ones(size(M));
-    elseif (initialization == "strum")
-        lambda1 = ones(3,size(M,2));
+    if (initialization == "strum")
+        F11 = fundamental_matrix(x1, x1);
+        [~, ~, V] = svd(F11);
+        e = V(:,end)./V(end,end);
+        for j = 1:length(x2)
+            lambda(1,j) = (x1(:,j)'*F11*(cross(e,x1(:,j))/norm(cross(e,x1(:,j)))^2));
+        end       
         F21 = fundamental_matrix(x2, x1);
         [~, ~, V] = svd(F21);
-        e = V(:,length(V))./V(length(V),length(V));
-        lambda2 = lambda1;
+        e = V(:,end)./V(end,end);
         for j = 1:length(x2)
-            lambda2(:,j) =  (x1(:,j)'*F21*(cross(e,x2(:,j))/norm(cross(e,x2(:,j)))^2))*lambda1(:,j);
+            lambda(2,j) = (x1(:,j)'*F21*(cross(e,x2(:,j))/norm(cross(e,x2(:,j)))^2));
         end
-        lambda = [lambda1;lambda2];
-    else
-        error("Not valid lambda initialization");
+    elseif (initialization ~= "ones")
+        error("Not valid lambda initialization");      
     end
     
     dx_old = Inf;
@@ -41,7 +42,14 @@ function [Pproj, Xproj] = factorization_method(x1, x2, initialization, th1, th2)
             cols = ~cols;
         end
 
-        M = M.*lambda;
+        M = zeros(6, length(x2));
+        M(1,:) = lambda(1,:) .* x1(1,:);
+        M(2,:) = lambda(1,:) .* x1(2,:);
+        M(3,:) = lambda(1,:) .* x1(3,:);
+        M(4,:) = lambda(2,:) .* x2(1,:);
+        M(5,:) = lambda(2,:) .* x2(2,:);
+        M(6,:) = lambda(2,:) .* x2(3,:);
+        
         [U, D, V] = svd(M);        
         Pproj=U*D(:,1:4);
         V = V';

@@ -196,10 +196,10 @@ plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
 
 %% Visualize projective reconstruction
-% Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
-% Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
-% Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
-% X=Xaux;
+Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
+Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
+Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
+X=Xaux;
 
 figure;
 hold on;
@@ -261,17 +261,19 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
-Xv1 = triangulate(euclid(v1), euclid(v1p), P1, P2, [h,w]);
-Xv2 = triangulate(euclid(v2), euclid(v2p), P1, P2, [h,w]);
-Xv3 = triangulate(euclid(v3), euclid(v3p), P1, P2, [h,w]);
+Xv1 = triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv2 = triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv3 = triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
 
 
-Hp = eye(4,4);
 A = [Xv1';Xv2';Xv3'];
 [~,~,V] = svd(A);
-Hp(1,4)=V(1,end);
-Hp(2,4)=V(2,end);
-Hp(3,4)=V(3,end);
+
+p = V(:,end);
+p = euclid(p);
+
+Hp = eye(4,4);
+Hp(4,1:3) = p';
 
 %% check results
 
@@ -318,13 +320,39 @@ axis equal
 %% 3. Metric reconstruction (synthetic data)
 
 % ToDo: compute the matrix Ha that 
-%       upgrades the projective reconstruction to an affine reconstruction
+%       upgrades the projective reconstruction to an metric reconstruction
 % Use the following vanishing points given by three pair of orthogonal lines
 % and assume that the skew factor is zero and that pixels are square
 
 v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
+
+A =[v1(1)*v2(1), v1(1)*v2(2) + v1(2)*v2(1), v1(1)*v2(3) + v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3) + v1(3)*v2(2), v1(3)*v2(3);
+    v1(1)*v3(1), v1(1)*v3(2) + v1(2)*v3(1), v1(1)*v3(3) + v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3) + v1(3)*v3(2), v1(3)*v3(3);
+    v2(1)*v3(1), v2(1)*v3(2) + v2(2)*v3(1), v2(1)*v3(3) + v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3) + v2(3)*v3(2), v2(3)*v3(3);
+         0     ,             1            ,             0            ,      0     ,             0            ,     0      ;
+         1     ,             0            ,             0            ,     -1     ,             0            ,     0     ];
+
+
+[~,~, V] = svd(A);
+wv = V(:,end);
+
+w = [wv(1) wv(2) wv(3);
+     wv(2) wv(4) wv(5);
+     wv(3) wv(5) wv(6)];
+     
+% We need to compute matrix A from slide 29 (lecture 9)
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:,1:3);
+
+AAt = inv(M'*w*M);
+
+A = chol(AAt);
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
+
 
 %% check results
 
