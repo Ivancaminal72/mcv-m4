@@ -2,7 +2,7 @@
 %% Lab 5: Reconstruction from uncalibrated viewas
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../lab2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,7 +66,7 @@ K = [709 0 450; 0 709 300; 0 0 1];
 Rz = [cos(0.88*pi/2) -sin(0.88*pi/2) 0; sin(0.88*pi/2) cos(0.88*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
 R1 = Rz*Ry;
-t1 = -R1*[40; 10; 5];
+t1 = -R1*[42; 5; 10];
 
 Rz = [cos(0.8*pi/2) -sin(0.8*pi/2) 0; sin(0.8*pi/2) cos(0.8*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
@@ -93,7 +93,7 @@ plot_camera2(P1,w,h);
 plot_camera2(P2,w,h);
 for i = 1:length(X)
     scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
-end;
+end
 axis equal;
 axis vis3d;
 
@@ -170,6 +170,10 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % in the previous iteration.
 
 %% Check projected points (estimated and data points)
+init = "strum"; % "ones" / "strum"
+th1 = 0.1;
+th2 = 0.1;
+[Pproj, Xproj] = factorization_method(x1, x2, init, th1, th2);
 
 for i=1:2
     x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
@@ -192,10 +196,10 @@ plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
 
 %% Visualize projective reconstruction
-Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
-Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
-Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
-X=Xaux;
+% Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
+% Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
+% Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
+% X=Xaux;
 
 figure;
 hold on;
@@ -257,7 +261,17 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that 
 %       upgrades the projective reconstruction to an affine reconstruction
+Xv1 = triangulate(euclid(v1), euclid(v1p), P1, P2, [h,w]);
+Xv2 = triangulate(euclid(v2), euclid(v2p), P1, P2, [h,w]);
+Xv3 = triangulate(euclid(v3), euclid(v3p), P1, P2, [h,w]);
 
+
+Hp = eye(4,4);
+A = [Xv1';Xv2';Xv3'];
+[~,~,V] = svd(A);
+Hp(1,4)=V(1,end);
+Hp(2,4)=V(2,end);
+Hp(3,4)=V(3,end);
 
 %% check results
 
@@ -407,7 +421,7 @@ figure; hold on;
 [w,h] = size(I{1});
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
-end;
+end
 axis equal;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
