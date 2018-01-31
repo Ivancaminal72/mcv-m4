@@ -472,10 +472,11 @@ acceleration = 0;
 focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
-%[horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
-%Load of already computed vanishing points from facade images because the
-%function detect_vps does not work for us
-load('VPs.mat');
+[horizon1, VPs1] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
+img_in =  'Data/0001_s.png'; % input image
+[horizon2, VPs2] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
 Xv1 = triangulate(VPs1(:,1), VPs2(:,1), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
 Xv2 = triangulate(VPs1(:,2), VPs2(:,2), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
 Xv3 = triangulate(VPs1(:,3), VPs2(:,3), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
