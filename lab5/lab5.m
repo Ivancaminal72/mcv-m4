@@ -405,14 +405,53 @@ Irgb{2} = double(imread('Data/0001_s.png'))/255;
 I{1} = sum(Irgb{1}, 3) / 3; 
 I{2} = sum(Irgb{2}, 3) / 3;
 
+[h, w] = size(Irgb{1});
+
 Ncam = length(I);
 
 % ToDo: compute a projective reconstruction using the factorization method
+points = cell(2,1);
+descr = cell(2,1);
+for i = 1:2
+    [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+    points{i} = points{i}(1:2,:);
+end
 
+matches = siftmatch(descr{1}, descr{2});
+
+x1 = [points{1}(:,matches(1,:)); ones(1,length(matches))];
+x2 = [points{2}(:,matches(2,:)); ones(1,length(matches))];
+[~, inliers] = ransac_fundamental_matrix(x1, x2, 2.0);
+inliers_matches=matches(:,inliers);
+x1 = [points{1}(:,inliers_matches(1,:)); ones(1,length(inliers_matches))];
+x2 = [points{2}(:,inliers_matches(2,:)); ones(1,length(inliers_matches))];
 % ToDo: show the data points (image correspondences) and the projected
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
+%% Check projected points (estimated and data points)
+init = "strum"; % "ones" / "strum"
+th1 = 0.1;
+th2 = 0.1;
+[Pproj, Xproj] = factorization_method(x1, x2, init, th1, th2);
 
+for i=1:2
+    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
+end
+x_d{1} = euclid(x1);
+x_d{2} = euclid(x2);
+
+% image 1
+figure;
+hold on
+plot(x_d{1}(1,:),x_d{1}(2,:),'r*');
+plot(x_proj{1}(1,:),x_proj{1}(2,:),'bo');
+axis equal
+
+% image 2
+figure;
+hold on
+plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
+plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Affine reconstruction (real data)
 
@@ -425,7 +464,7 @@ Ncam = length(I);
 
 % This is an example on how to obtain the vanishing points (VPs) from three
 % orthogonal lines in image 1
-
+addpath(genpath('vanishing_points_v0.9'));
 img_in =  'Data/0000_s.png'; % input image
 folder_out = '.'; % output folder
 manhattan = 1;
@@ -433,20 +472,33 @@ acceleration = 0;
 focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
-[horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+%[horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+%Load of already computed vanishing points from facade images because the
+%function detect_vps does not work for us
+load('VPs.mat');
+Xv1 = triangulate(VPs1(:,1), VPs2(:,1), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv2 = triangulate(VPs1(:,2), VPs2(:,2), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv3 = triangulate(VPs1(:,3), VPs2(:,3), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
 
 
+A = [Xv1';Xv2';Xv3'];
+[~,~,V] = svd(A);
+
+p = V(:,end);
+p = euclid(p);
+
+Hp = eye(4,4);
+Hp(4,1:3) = p';
 %% Visualize the result
 
 % x1m are the data points in image 1
 % Xm are the reconstructed 3D points (projective reconstruction)
 
-r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
-g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
-b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
-Xe = euclid(Hp*Xm);
+r = interp2(double(Irgb{1}(:,:,1)), x1(1,:), x1(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1(1,:), x1(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1(1,:), x1(2,:));
+Xe = euclid(Hp*Xproj);
 figure; hold on;
-[w,h] = size(I{1});
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
 end
@@ -457,6 +509,35 @@ axis equal;
 
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
+
+v1 = vanishing_point([394;581;1],[346;580;1],[348;537;1],[395;537;1]);
+v2 = vanishing_point([347;537;1],[347;580;1],[395;539;1],[395;582;1]);
+v3 = vanishing_point([239;63;1],[307;209;1],[165;70;1],[250;212;1]);
+
+A =[v1(1)*v2(1), v1(1)*v2(2) + v1(2)*v2(1), v1(1)*v2(3) + v1(3)*v2(1), v1(2)*v2(2), v1(2)*v2(3) + v1(3)*v2(2), v1(3)*v2(3);
+    v1(1)*v3(1), v1(1)*v3(2) + v1(2)*v3(1), v1(1)*v3(3) + v1(3)*v3(1), v1(2)*v3(2), v1(2)*v3(3) + v1(3)*v3(2), v1(3)*v3(3);
+    v2(1)*v3(1), v2(1)*v3(2) + v2(2)*v3(1), v2(1)*v3(3) + v2(3)*v3(1), v2(2)*v3(2), v2(2)*v3(3) + v2(3)*v3(2), v2(3)*v3(3);
+         0     ,             1            ,             0            ,      0     ,             0            ,     0      ;
+         1     ,             0            ,             0            ,     -1     ,             0            ,     0     ];
+
+
+[~,~, V] = svd(A);
+wv = V(:,end);
+
+w = [wv(1) wv(2) wv(3);
+     wv(2) wv(4) wv(5);
+     wv(3) wv(5) wv(6)];
+     
+% We need to compute matrix A from slide 29 (lecture 9)
+P = Pproj(1:3, :)*inv(Hp);
+M = P(:,1:3);
+
+AAt = inv(M'*w*M);
+A = chol(AAt);
+
+Ha = eye(4,4);
+Ha(1:3,1:3) = inv(A);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views
